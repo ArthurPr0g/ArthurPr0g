@@ -1,0 +1,58 @@
+name: Perfil vivo
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 06:00 em Brasília
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: perfil-vivo
+  cancel-in-progress: false
+
+jobs:
+  painel:
+    name: Painel ao vivo + frase do dia
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Gerar SVGs
+        run: node scripts/gerar.mjs
+        env:
+          # PERFIL_TOKEN (opcional): token pessoal para contar também as contribuições privadas
+          GITHUB_TOKEN: ${{ secrets.PERFIL_TOKEN || secrets.GITHUB_TOKEN }}
+      - name: Cortar fontes (só os caracteres usados)
+        run: |
+          pip install --quiet fonttools brotli
+          python scripts/otimizar_fontes.py
+      - name: Salvar se mudou
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Nada mudou."; else git commit -m "painel: atualização diária" && git push; fi
+
+  cobrinha:
+    name: Cobrinha das contribuições
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Platane/snk@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/cobrinha.svg?palette=github-light&color_snake=#3860AC
+            dist/cobrinha-escura.svg?palette=github-dark&color_snake=#81AAF7&color_dots=#161b22,#1b2a4a,#2b4a85,#4f78c8,#81AAF7
+      - uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: output
+          build_dir: dist
+          commit_message: "cobrinha: atualização"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
