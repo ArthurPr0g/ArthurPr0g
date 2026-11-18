@@ -55,7 +55,7 @@
 </picture>
 
 <!-- FRASE:INICIO -->
-<p align="center"><sub>FRASE DO DIA</sub><br/><em>"Pamonha, café e um terminal aberto: combo goiano de produtividade."</em></p>
+<p align="center"><sub>FRASE DO DIA</sub><br/><em>"Todo sistema grande começou como um 'é rapidinho'."</em></p>
 <!-- FRASE:FIM -->
 
 <img src="assets/rodape.svg" width="100%" alt="Valeu pela visita! Feito com café, Claude Code e uma pitada de caos."/>
